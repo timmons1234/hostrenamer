@@ -1,7 +1,7 @@
 ---
 - hosts: Rack2_TOR
   gather_facts: yes
-  connection: local
+  connection: local 
 
 
   tasks:
@@ -28,19 +28,16 @@
 
   - name: Define new Variable
     set_fact:
-      new_hostname: "{{ switch_hostname.stdout | regex_replace('^.*?(CV.*?)FEIA(.*?)\\.switch.*$', '\\1CMB\\2') }}"
+      new_hostname: "{{ switch_hostname.stdout | regex_replace('^.*?(CV.*?)FIEA(.*?)\\.switch.*$', '\\1CMB\\2') }}"
 
 #  - debug: var=new_hostname
 
-#  - name: Update Hostname
-#    nxos_config:
-#      lines: hostname {{ new_hostname }}
-#      save_when: modified
+  - name: Update Hostname
+    nxos_config:
+      lines: hostname {{ new_hostname }}
+      save_when: modified
 
-
-  - name: Set Description of E1/3
-    ios_interface:
-      name: Eth1/3
-      description: "{{ new_hostname }}"
-
-
+#  - name: Set Description of E1/3
+#    ios_interface: 
+#      name: Eth1/3
+#      description: "{{ new_hostname }}"
