@@ -1,14 +1,15 @@
 ---
 - hosts: Rack2_TOR
   gather_facts: yes
-  connection: local 
+  connection: local
 
-
+# Source the ciscoworks username and password stored in the following file
   tasks:
   - name: GET CREDENTIALS
     include_vars: ciscoworks.secret.yml
 
-  - name: DEFINE CONNECTION
+# Set global variables which device the hostname, username and password
+- name: DEFINE CONNECTION
     set_fact:
        connection:
           host: "{{ inventory_hostname }}"
@@ -16,7 +17,7 @@
           password: "{{ creds['password'] }}"
           auth_pass: "{{ creds['auth_pass'] }}"
 
-
+# Source the hostname from the device
   - name: GATHER Hostname
     ios_command:
       provider: "{{ connection }}"
@@ -24,20 +25,37 @@
          - show hostname
     register: switch_hostname
 
+# Debug output to show our variable
 #  - debug: var=switch_hostname.stdout_lines
 
-  - name: Define new Variable
+# Pass the hostname to a regular expression and save to a new variable
+# Regex is: 
+# -1- -2   - -3- - 4- -    5     -
+# ^.*?(CV.*?)FIEA(.*?)\\.switch.*$', '\\1CMB\\2'
+# 1 Beginning of line, non greedy search until
+# Store - CV plus non greedy search until
+# Match the letters FIEA
+# Store - non greedy search until
+# Explicit match of ., then the words switch, then any characters until end of line
+#
+# replace as Store_1'+'CMB'+'Store_2'
+# EX: CV17_FIEA906_115_93180_R2-DC1 -> CV17_CMB906_115_93180_R2-DC1
+#
+- name: Define new Variable
     set_fact:
       new_hostname: "{{ switch_hostname.stdout | regex_replace('^.*?(CV.*?)FIEA(.*?)\\.switch.*$', '\\1CMB\\2') }}"
 
+# Debut output for the new variable
 #  - debug: var=new_hostname
 
-  - name: Update Hostname
+# Pass the nexus command to reset the hostname
+- name: Update Hostname
     nxos_config:
       lines: hostname {{ new_hostname }}
       save_when: modified
 
+# Debug test routine to store the same value in E1/3
 #  - name: Set Description of E1/3
-#    ios_interface: 
+#    ios_interface:
 #      name: Eth1/3
 #      description: "{{ new_hostname }}"
