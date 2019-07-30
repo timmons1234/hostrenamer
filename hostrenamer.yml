@@ -24,8 +24,13 @@
          - show hostname
     register: switch_hostname
 
-
   - debug: var=switch_hostname.stdout_lines
+
+  - name: new variable time
+    set_fact:
+      new_hostname: "{{ switch_hostname.stdout | regex_replace('^.*?(CV.*?)FEIA(.*?)\\.switch.*$', '\\1CMB\\2') }}"
+
+  - debug: var=new_hostname.stdout_lines
 
 #  - name: Set Description of E1/3
 #    ios_interface:
