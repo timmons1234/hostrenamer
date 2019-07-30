@@ -3,8 +3,8 @@
   gather_facts: yes
   connection: local
 
-# Source the ciscoworks username and password stored in the following file
   tasks:
+# Source the ciscoworks username and password stored in the following file
   - name: GET CREDENTIALS
     include_vars: ciscoworks.secret.yml
 
