@@ -1,0 +1,27 @@
+all:
+  vars:
+    ansible_connection: local
+    ansible_user: ciscoworks
+    ansible_ssh_pass: cw@cc0unt!
+  hosts:
+    R1DC1: 
+          ansible_host: 10.123.3.116
+    R1DC2:
+          ansible_host: 10.123.3.117
+    R2DC1: 
+          ansible_host: 10.123.3.118
+    R2DC2: 
+          ansible_host: 10.123.3.119
+  children:
+    Rack1_TOR:
+      hosts:
+        R1DC1:
+        R1DC2:
+    Rack2_TOR:
+      hosts:
+        R2DC1:
+        R2DC2:
+    RackALL_TOR:
+      children:
+        Rack1_TOR:
+        Rack2_TOR:
