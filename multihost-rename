@@ -1,0 +1,46 @@
+---
+- hosts: Rack2_TOR
+  gather_facts: yes
+  connection: local
+
+
+  tasks:
+  - name: GET CREDENTIALS
+    include_vars: ciscoworks.secret.yml
+
+  - name: DEFINE CONNECTION
+    set_fact:
+       connection:
+          host: "{{ inventory_hostname }}"
+          username: "{{ creds['username'] }}"
+          password: "{{ creds['password'] }}"
+          auth_pass: "{{ creds['auth_pass'] }}"
+
+
+  - name: GATHER Hostname
+    ios_command:
+      provider: "{{ connection }}"
+      commands:
+         - show hostname
+    register: switch_hostname
+
+#  - debug: var=switch_hostname.stdout_lines
+
+  - name: Define new Variable
+    set_fact:
+      new_hostname: "{{ switch_hostname.stdout | regex_replace('^.*?(CV.*?)FEIA(.*?)\\.switch.*$', '\\1CMB\\2') }}"
+
+#  - debug: var=new_hostname
+
+#  - name: Update Hostname
+#    nxos_config:
+#      lines: hostname {{ new_hostname }}
+#      save_when: modified
+
+
+  - name: Set Description of E1/3
+    ios_interface:
+      name: Eth1/3
+      description: "{{ new_hostname }}"
+
+
